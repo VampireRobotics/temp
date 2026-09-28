@@ -16,18 +16,4 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
-
-    // Road Runner (Legacy 0.5.6)
-    implementation 'com.acmerobotics.roadrunner:core:0.5.6'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
-    implementation 'org.apache.commons:commons-math3:3.6.1'
-
-    // Fix for LogFiles.java
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7'
-
-    // Pedro Pathing & BioBuzz Suite
-    implementation 'com.pedropathing:ftc:2.0.4'
-    implementation 'com.pedropathing:telemetry:1.0.0'
-    implementation 'com.bylazar:fullpanels:1.0.6'
-    implementation 'org.ftclib.ftclib:core:2.1.1'
 }
