@@ -27,7 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+masterw
 package org.firstinspires.ftc.robotcontroller.external.samples.externalhardware;
+
+package org.firstinspires.ftc.robotcontroller.external.samples;
+master
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
