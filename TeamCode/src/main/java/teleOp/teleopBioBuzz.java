@@ -7,7 +7,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import hardwareParts.CalculateTargetPower;
 import hardwareParts.CalculateTargetRPM;
 import hardwareParts.IntakeDecode;
