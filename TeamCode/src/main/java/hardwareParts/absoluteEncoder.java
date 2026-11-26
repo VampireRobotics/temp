@@ -15,7 +15,7 @@ public class absoluteEncoder {
 
     public void update() {
         voltage = encoder.getVoltage();
-        angle = (voltage * 3) / 3.3 * 360.0;
+        angle = (voltage*3) / 3.3 * 360.0;
     }
 
     public double getVoltage() { return voltage; }

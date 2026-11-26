@@ -11,7 +11,19 @@ public class testAbsoluteEncoder extends LinearOpMode {
 
     public DcMotor motor1 = null;
 
-    private static final double kP = 0.015;
+    private static final double kP = 0.008;
+    // 0..1, mai mic = mai neted dar mai lent
+    private static final double FILTER = 0.2;
+    // dupa oprire, reporneste doar daca eroarea depaseste valoarea asta
+    private static final double RESTART_ERROR = 8.0;
+    private double filteredAngle = Double.NaN;
+    private boolean holding = false;
+    // daca motorul fuge de tinta in loc sa mearga spre ea, schimba in -1.0
+    private static final double DIRECTION = 1.0;
+    // sub eroarea asta (grade) motorul se opreste
+    private static final double TOLERANCE = 4.0;
+    // limita de putere ca sa nu fuga motorul
+    private static final double MAX_POWER = 0.3;
 
     @Override
     public void runOpMode() {
@@ -19,42 +31,61 @@ public class testAbsoluteEncoder extends LinearOpMode {
         motor1 = hardwareMap.get(DcMotor.class, "motorIntake");
         motor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // merge la 22 grade la init
+        double targetAngle = 22.0;
+
+        // la init merge la 22 de grade si se opreste
         while (!isStarted() && !isStopRequested()) {
             encoder.update();
-            double error = shortestAngularError(encoder.getAngle(), 22.0);
-            motor1.setPower(Math.max(-1.0, Math.min(1.0, kP * error)));
-            telemetry.addData("Init - Current", "%.1f deg", encoder.getAngle());
-            telemetry.addData("Init - Error",   "%.1f deg", error);
-            telemetry.update();
+            driveToTarget(encoder, targetAngle);
         }
-        motor1.setPower(0);
 
         waitForStart();
-
-        double targetAngle = 22.0;
 
         while (opModeIsActive()) {
             encoder.update();
 
+            // cross -> 180, square -> 270 (absolut), apoi se opreste la tinta
             if (gamepad1.cross) {
-                targetAngle = normalizeAngle(targetAngle + 180.0);
+                targetAngle = 180.0;
             }
-
             else if (gamepad1.square) {
-                targetAngle = normalizeAngle(targetAngle + 270.0);
+                targetAngle = 270.0;
             }
 
-            double error = shortestAngularError(encoder.getAngle(), targetAngle);
-            double power = Math.max(-1.0, Math.min(1.0, kP * error));
-            motor1.setPower(power);
-
-            telemetry.addData("Target",  "%.1f deg", targetAngle);
-            telemetry.addData("Current", "%.1f deg", encoder.getAngle());
-            telemetry.addData("Error",   "%.1f deg", error);
-            telemetry.addData("Power",   "%.3f",     power);
-            telemetry.update();
+            driveToTarget(encoder, targetAngle);
         }
+        motor1.setPower(0);
+    }
+
+    private void driveToTarget(absoluteEncoder encoder, double targetAngle) {
+        double raw = normalizeAngle(encoder.getAngle());
+
+        // filtru ca zgomotul senzorului (2-3 grade) sa nu miste motorul
+        if (Double.isNaN(filteredAngle)) filteredAngle = raw;
+        filteredAngle = normalizeAngle(filteredAngle + FILTER * shortestAngularError(filteredAngle, raw));
+        double current = filteredAngle;
+        double error = shortestAngularError(current, targetAngle);
+
+        // histereza: dupa ce a ajuns la tinta, nu mai porneste pana nu iese din RESTART_ERROR
+        if (Math.abs(error) <= TOLERANCE) holding = true;
+        else if (Math.abs(error) > RESTART_ERROR) holding = false;
+
+        double power = 0;
+        if (!holding) {
+            power = DIRECTION * kP * error;
+            power = Math.max(-MAX_POWER, Math.min(MAX_POWER, power));
+        }
+
+        // cerc = motor oprit, ca sa poti roti de mana si citi voltajul
+        if (gamepad1.circle) power = 0;
+        motor1.setPower(power);
+
+        telemetry.addData("Voltage", "%.3f V", encoder.getVoltage());
+        telemetry.addData("Target",  "%.1f deg", targetAngle);
+        telemetry.addData("Current", "%.1f deg", current);
+        telemetry.addData("Error",   "%.1f deg", error);
+        telemetry.addData("Power",   "%.3f",     power);
+        telemetry.update();
     }
 
     private double normalizeAngle(double angle) {
