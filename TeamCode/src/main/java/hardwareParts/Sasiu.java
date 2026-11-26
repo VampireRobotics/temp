@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Sasiu {
-    //gear ratio 146/20
-    private double speed = 1;
+
+    private double speed = 1;// 1.75
     public Telemetry telemetry;
     public HardwareMap hardwaremap;
 
@@ -16,6 +16,9 @@ public class Sasiu {
     public DcMotor rightRear;
     public DcMotor leftFront;
     public DcMotor leftRear;
+
+    //   public Servo pinionLeft;
+    //   public Servo pinionRight;
 
     public Sasiu(HardwareMap hardwaremap, Telemetry telemetry) {
         this.hardwaremap = hardwaremap;
@@ -34,6 +37,9 @@ public class Sasiu {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+       /*pinionLeft = hardwaremap.get(Servo.class, "pinionLeft");
+       pinionRight = hardwaremap.get(Servo.class, "pinionRight");*/
     }
 
     public void Drive(double forward, double strafe, double turn) {
